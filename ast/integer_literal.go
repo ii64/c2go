@@ -5,6 +5,7 @@ type IntegerLiteral struct {
 	Addr       Address
 	Pos        Position
 	Type       string
+	IsValue    bool
 	Value      string
 	ChildNodes []Node
 }

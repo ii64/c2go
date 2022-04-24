@@ -2,6 +2,7 @@
 package ast
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -61,6 +62,14 @@ func Parse(fullline string) Node {
 		isArrayFiller = true
 	}
 
+	const valuePrefix = "value: "
+	isValue := false
+	if strings.HasPrefix(line, valuePrefix) {
+		line = strings.TrimPrefix(line, valuePrefix)
+		isValue = true
+	}
+	_ = isValue
+
 	parts := strings.SplitN(line, " ", 2)
 	nodeName := parts[0]
 
@@ -74,6 +83,8 @@ func Parse(fullline string) Node {
 		return parseAlignedAttr(line)
 	case "AllocSizeAttr":
 		return parseAllocSizeAttr(line)
+	case "AllocAlignAttr":
+		return parseAllocAlignAttr(line)
 	case "AlwaysInlineAttr":
 		return parseAlwaysInlineAttr(line)
 	case "ArraySubscriptExpr":
@@ -92,6 +103,8 @@ func Parse(fullline string) Node {
 		return parseBreakStmt(line)
 	case "BuiltinType":
 		return parseBuiltinType(line)
+	case "BuiltinAttr":
+		return parseBuiltinAttr(line)
 	case "C11NoReturnAttr":
 		return parseC11NoReturnAttr(line)
 	case "CallExpr":
@@ -178,6 +191,8 @@ func Parse(fullline string) Node {
 		n := parseImplicitValueInitExpr(line)
 		n.IsArrayFiller = isArrayFiller
 		return n
+	case "Int":
+		return parseInt(line)
 	case "IncompleteArrayType":
 		return parseIncompleteArrayType(line)
 	case "IndirectFieldDecl":
@@ -187,7 +202,9 @@ func Parse(fullline string) Node {
 	case "InlineCommandComment":
 		return parseInlineCommandComment(line)
 	case "IntegerLiteral":
-		return parseIntegerLiteral(line)
+		n := parseIntegerLiteral(line)
+		n.IsValue = isValue
+		return n
 	case "LabelStmt":
 		return parseLabelStmt(line)
 	case "MallocAttr":
@@ -291,7 +308,8 @@ func Parse(fullline string) Node {
 	case "NullStmt":
 		return nil
 	default:
-		panic("unknown node type: '" + fullline + "'")
+		panic(fmt.Sprintf("unknown node type: fullline=%q nodename=%q line=%q parts=%+v", fullline, nodeName, line, parts))
+		//		panic("unknown node type: fullline='" + fullline + "' nodename='"+nodeName+"' line='"+line+"'")
 	}
 }
 

@@ -235,6 +235,8 @@ func setPosition(node Node, position Position) {
 		n.Pos = position
 	case *AllocSizeAttr:
 		n.Pos = position
+	case *AllocAlignAttr:
+		n.Pos = position
 	case *AlwaysInlineAttr:
 		n.Pos = position
 	case *ArraySubscriptExpr:
@@ -248,6 +250,8 @@ func setPosition(node Node, position Position) {
 	case *BlockCommandComment:
 		n.Pos = position
 	case *BreakStmt:
+		n.Pos = position
+	case *BuiltinAttr:
 		n.Pos = position
 	case *C11NoReturnAttr:
 		n.Pos = position
@@ -413,7 +417,7 @@ func setPosition(node Node, position Position) {
 		*QualType, *PointerType, *DecayedType, *ParenType,
 		*IncompleteArrayType, *FunctionNoProtoType, *FunctionProtoType,
 		*EnumType, *Enum, *ElaboratedType, *ConstantArrayType, *BuiltinType,
-		*ArrayFiller, *Field, *AttributedType:
+		*ArrayFiller, *Field, *AttributedType, *Int:
 
 		// These do not have positions so they can be ignored.
 	default:
