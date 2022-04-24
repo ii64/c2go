@@ -228,7 +228,7 @@ func NewIdent(name string) *goast.Ident {
 		// unhelpful error message.
 		//
 		// Panic now so that we can see where the bad identifier is coming from.
-		panic(fmt.Sprintf("invalid identity: '%s'", name))
+		panic(fmt.Sprintf("warning: goast.NewIdent: invalid identity: %q\n", name))
 	}
 
 	return goast.NewIdent(name)

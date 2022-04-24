@@ -619,15 +619,24 @@ func CleanCType(s string) (out string) {
 
 // GenerateCorrectType - generate correct type
 // Example: 'union (anonymous union at tests/union.c:46:3)'
+// Example: 'union (unnamed union at /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:16:3)'
 func GenerateCorrectType(name string) string {
-	if !strings.Contains(name, "anonymous") {
+	if !strings.Contains(name, "anonymous") && !strings.Contains(name, "unnamed") {
 		return name
 	}
 	index := strings.Index(name, "(anonymous")
-	if index < 0 {
+	index2 := strings.Index(name, "(unnamed")
+	if index < 0 && index2 < 0 {
 		return name
 	}
-	name = strings.Replace(name, "anonymous", "", 1)
+
+	if index >= 0 {
+		name = strings.Replace(name, "anonymous", "", 1)
+	} else {
+		name = strings.Replace(name, "unnamed", "", 1)
+		index = index2
+	}
+
 	var last int
 	for last = index; last < len(name); last++ {
 		if name[last] == ')' {

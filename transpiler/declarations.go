@@ -112,6 +112,7 @@ func transpileRecordDecl(p *program.Program, n *ast.RecordDecl) (decls []goast.D
 		return
 	}
 
+	// correct naming.
 	name = types.GenerateCorrectType(name)
 	p.DefineType(name)
 
