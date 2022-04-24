@@ -42,12 +42,13 @@ var stderr io.Writer = os.Stderr
 // Do not instantiate this directly. Instead use DefaultProgramArgs(); then
 // modify any specific attributes.
 type ProgramArgs struct {
-	verbose     bool
-	ast         bool
-	inputFiles  []string
-	clangFlags  []string
-	outputFile  string
-	packageName string
+	clangBinPath string
+	verbose      bool
+	ast          bool
+	inputFiles   []string
+	clangFlags   []string
+	outputFile   string
+	packageName  string
 
 	// A private option to output the Go as a *_test.go file.
 	outputAsTest bool
@@ -56,6 +57,7 @@ type ProgramArgs struct {
 // DefaultProgramArgs default value of ProgramArgs
 func DefaultProgramArgs() ProgramArgs {
 	return ProgramArgs{
+		clangBinPath: "clang",
 		verbose:      false,
 		ast:          false,
 		packageName:  "main",
@@ -214,12 +216,12 @@ func Start(args ProgramArgs) (err error) {
 	if args.verbose {
 		fmt.Println("Running clang for AST tree...")
 	}
-	astPP, err := exec.Command("clang", "-Xclang", "-ast-dump",
+	astPP, err := exec.Command(args.clangBinPath, "-Xclang", "-ast-dump",
 		"-fsyntax-only", "-fno-color-diagnostics", ppFilePath).Output()
 	if err != nil {
 		// If clang fails it still prints out the AST, so we have to run it
 		// again to get the real error.
-		errBody, _ := exec.Command("clang", ppFilePath).CombinedOutput()
+		errBody, _ := exec.Command(args.clangBinPath, ppFilePath).CombinedOutput()
 
 		panic("clang failed: " + err.Error() + ":\n\n" + string(errBody))
 	}
@@ -339,6 +341,7 @@ func init() {
 
 var (
 	versionFlag       = flag.Bool("v", false, "print the version and exit")
+	clangBinFlag      = flag.String("clang-bin", "clang", "clang binary path")
 	transpileCommand  = flag.NewFlagSet("transpile", flag.ContinueOnError)
 	verboseFlag       = transpileCommand.Bool("V", false, "print progress as comments")
 	outputFlag        = transpileCommand.String("o", "", "output Go generated code to the specified file")
@@ -385,6 +388,7 @@ func runCommand() int {
 	}
 
 	args := DefaultProgramArgs()
+	args.clangBinPath = *clangBinFlag
 
 	switch os.Args[1] {
 	case "ast":
